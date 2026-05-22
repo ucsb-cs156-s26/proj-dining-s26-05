@@ -211,7 +211,16 @@
 <a name='L146'></a><a href='#L146'>146</a>
 <a name='L147'></a><a href='#L147'>147</a>
 <a name='L148'></a><a href='#L148'>148</a>
-<a name='L149'></a><a href='#L149'>149</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -257,8 +266,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">34x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -285,7 +296,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -359,6 +376,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React, { useState } from "react";
 import OurTable, { ButtonColumn } from "main/components/OurTable";
 import { useNavigate } from "react-router";
@@ -399,17 +417,19 @@ export default function ReviewsTable({
     ["/api/reviews/userReviews", "/api/reviews/needsmoderation"],
   );
 &nbsp;
-const approveMutation = useBackendMutation(
-<span class="fstat-no" title="function not covered" >  ({</span> cell, moderatorComments }<span class="cstat-no" title="statement not covered" >) =&gt; cellToAxiosParamsModerate(cell, "APPROVED", moderatorComments),</span>
-  { onSuccess: onModerateSuccess },
-  ["/api/reviews/needsmoderation"],
-);
+  const approveMutation = useBackendMutation(
+<span class="fstat-no" title="function not covered" >    ({</span> cell, moderatorComments }<span class="cstat-no" title="statement not covered" >) =&gt;</span>
+      cellToAxiosParamsModerate(cell, "APPROVED", moderatorComments),
+    { onSuccess: onModerateSuccess },
+    ["/api/reviews/needsmoderation"],
+  );
 &nbsp;
-const rejectMutation = useBackendMutation(
-<span class="fstat-no" title="function not covered" >  ({</span> cell, moderatorComments }<span class="cstat-no" title="statement not covered" >) =&gt; cellToAxiosParamsModerate(cell, "REJECTED", moderatorComments),</span>
-  { onSuccess: onModerateSuccess },
-  ["/api/reviews/needsmoderation"],
-);
+  const rejectMutation = useBackendMutation(
+<span class="fstat-no" title="function not covered" >    ({</span> cell, moderatorComments }<span class="cstat-no" title="statement not covered" >) =&gt;</span>
+      cellToAxiosParamsModerate(cell, "REJECTED", moderatorComments),
+    { onSuccess: onModerateSuccess },
+    ["/api/reviews/needsmoderation"],
+  );
   // Stryker restore all
 &nbsp;
   // Stryker disable next-line all
@@ -429,14 +449,20 @@ const rejectMutation = useBackendMutation(
     setShow(true);
   };
 &nbsp;
-const handleSubmit = <span class="fstat-no" title="function not covered" >({</span> moderatorComment }) =&gt; {
-<span class="cstat-no" title="statement not covered" >  if (pendingStatus === "APPROVED") {</span>
-<span class="cstat-no" title="statement not covered" >    approveMutation.mutate({ cell: pendingCell, moderatorComments: moderatorComment });</span>
-  } else {
-<span class="cstat-no" title="statement not covered" >    rejectMutation.mutate({ cell: pendingCell, moderatorComments: moderatorComment });</span>
-  }
-<span class="cstat-no" title="statement not covered" >  handleClose();</span>
-};
+  const handleSubmit = <span class="fstat-no" title="function not covered" >({</span> moderatorComment }) =&gt; {
+<span class="cstat-no" title="statement not covered" >    if (pendingStatus === "APPROVED") {</span>
+<span class="cstat-no" title="statement not covered" >      approveMutation.mutate({</span>
+        cell: pendingCell,
+        moderatorComments: moderatorComment,
+      });
+    } else {
+<span class="cstat-no" title="statement not covered" >      rejectMutation.mutate({</span>
+        cell: pendingCell,
+        moderatorComments: moderatorComment,
+      });
+    }
+<span class="cstat-no" title="statement not covered" >    handleClose();</span>
+  };
 &nbsp;
   const columns = [
     {
@@ -507,14 +533,15 @@ const handleSubmit = <span class="fstat-no" title="function not covered" >({</sp
       &lt;OurTable data={reviews} columns={columns} testid={"Reviewstable"} /&gt;
     &lt;/div&gt;
   );
-}</pre></td></tr></table></pre>
+}
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-22T00:31:15.500Z
+                at 2026-05-22T00:35:45.201Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
