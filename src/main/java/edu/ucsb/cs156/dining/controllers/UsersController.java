@@ -37,7 +37,7 @@ public class UsersController extends ApiController {
   }
 
   @Operation(summary = "Get a list of all users with a proposed alias")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MODERATOR')")
   @GetMapping("/admin/usersWithProposedAlias")
   public ResponseEntity<Iterable<User>> getUsersWithProposedAlias() {
     Iterable<User> users = userRepository.findByProposedAliasNotNull();
