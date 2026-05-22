@@ -39,8 +39,16 @@ public class ModeratorsController extends ApiController {
   @Operation(summary = "Create a new Moderator")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/post")
+
   public Moderator postModerator(@RequestParam String email) {
     String convertedEmail = CanonicalFormConverter.convertToValidEmail(email).strip();
+
+    // If user already exists in the system, mark them as moderator
+    User user = userRepository.findByEmail(convertedEmail).orElse(null);
+    if (user != null) {
+      user.setModerator(true);
+      userRepository.save(user);
+    }
     Moderator moderator = Moderator.builder().email(convertedEmail).build();
     moderatorRepository.save(moderator);
     return moderator;
