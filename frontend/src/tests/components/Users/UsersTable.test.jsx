@@ -62,14 +62,28 @@ describe("UserTable tests", () => {
       expect(header).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId(`${testId}-cell-row-0-col-id`)).toHaveTextContent("1");
-    expect(screen.getByTestId(`${testId}-cell-row-0-col-admin`)).toHaveTextContent("true");
-    expect(screen.getByTestId(`${testId}-cell-row-0-col-moderator`)).toHaveTextContent("false");
-    expect(screen.getByTestId(`${testId}-cell-row-1-col-id`)).toHaveTextContent("2");
-    expect(screen.getByTestId(`${testId}-cell-row-1-col-admin`)).toHaveTextContent("false");
+    expect(screen.getByTestId(`${testId}-cell-row-0-col-id`)).toHaveTextContent(
+      "1",
+    );
+    expect(
+      screen.getByTestId(`${testId}-cell-row-0-col-admin`),
+    ).toHaveTextContent("true");
+    expect(
+      screen.getByTestId(`${testId}-cell-row-0-col-moderator`),
+    ).toHaveTextContent("false");
+    expect(screen.getByTestId(`${testId}-cell-row-1-col-id`)).toHaveTextContent(
+      "2",
+    );
+    expect(
+      screen.getByTestId(`${testId}-cell-row-1-col-admin`),
+    ).toHaveTextContent("false");
 
-    expect(screen.getByTestId(`${testId}-header-Toggle Admin`)).toBeInTheDocument();
-    expect(screen.getByTestId(`${testId}-header-Toggle Moderator`)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`${testId}-header-Toggle Admin`),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`${testId}-header-Toggle Moderator`),
+    ).toBeInTheDocument();
   });
 
   test("Toggle Admin button calls mutation with correct cell", async () => {
