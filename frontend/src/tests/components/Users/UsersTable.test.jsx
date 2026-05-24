@@ -110,23 +110,25 @@ describe("UserTable tests", () => {
     });
   });
 
-  test("Toggle Admin button calls mutation with correct cell", async () => {
+  test("Toggle Admin button has primary style and calls mutation", async () => {
     render(<UsersTable users={usersFixtures.threeUsers} />);
 
     const toggleAdminButton = screen.getByTestId(
       "UsersTable-cell-row-0-col-Toggle Admin-button",
     );
+    expect(toggleAdminButton).toHaveClass("btn-primary");
     fireEvent.click(toggleAdminButton);
 
     await waitFor(() => expect(mutateFn).toHaveBeenCalled());
   });
 
-  test("Toggle Moderator button calls mutation with correct cell", async () => {
+  test("Toggle Moderator button has primary style and calls mutation", async () => {
     render(<UsersTable users={usersFixtures.threeUsers} />);
 
     const toggleModeratorButton = screen.getByTestId(
       "UsersTable-cell-row-0-col-Toggle Moderator-button",
     );
+    expect(toggleModeratorButton).toHaveClass("btn-primary");
     fireEvent.click(toggleModeratorButton);
 
     await waitFor(() => expect(mutateFn).toHaveBeenCalled());
