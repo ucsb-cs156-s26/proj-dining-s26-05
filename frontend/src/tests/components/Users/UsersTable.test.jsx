@@ -1,8 +1,24 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import usersFixtures from "fixtures/usersFixtures";
 import UsersTable from "main/components/Users/UsersTable";
+import { useBackendMutation } from "main/utils/useBackend";
+import { vi } from "vitest";
+
+vi.mock("main/utils/useBackend", () => ({
+  useBackendMutation: vi.fn(),
+}));
 
 describe("UserTable tests", () => {
+  const mutateFn = vi.fn();
+
+  beforeEach(() => {
+    useBackendMutation.mockReturnValue({ mutate: mutateFn });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   test("renders without crashing for empty table", () => {
     render(<UsersTable users={[]} />);
   });
@@ -11,7 +27,7 @@ describe("UserTable tests", () => {
     render(<UsersTable users={usersFixtures.threeUsers} />);
   });
 
-  test("Has the expected colum headers and content", () => {
+  test("Has the expected column headers and content", () => {
     render(<UsersTable users={usersFixtures.threeUsers} />);
 
     const expectedHeaders = [
@@ -46,24 +62,36 @@ describe("UserTable tests", () => {
       expect(header).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId(`${testId}-cell-row-0-col-id`)).toHaveTextContent(
-      "1",
+    expect(screen.getByTestId(`${testId}-cell-row-0-col-id`)).toHaveTextContent("1");
+    expect(screen.getByTestId(`${testId}-cell-row-0-col-admin`)).toHaveTextContent("true");
+    expect(screen.getByTestId(`${testId}-cell-row-0-col-moderator`)).toHaveTextContent("false");
+    expect(screen.getByTestId(`${testId}-cell-row-1-col-id`)).toHaveTextContent("2");
+    expect(screen.getByTestId(`${testId}-cell-row-1-col-admin`)).toHaveTextContent("false");
+
+    expect(screen.getByTestId(`${testId}-header-Toggle Admin`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${testId}-header-Toggle Moderator`)).toBeInTheDocument();
+  });
+
+  test("Toggle Admin button calls mutation with correct cell", async () => {
+    render(<UsersTable users={usersFixtures.threeUsers} />);
+
+    const toggleAdminButton = screen.getByTestId(
+      "UsersTable-cell-row-0-col-Toggle Admin-button",
     );
-    expect(
-      screen.getByTestId(`${testId}-cell-row-0-col-admin`),
-    ).toHaveTextContent("true");
-    expect(
-      screen.getByTestId(`${testId}-cell-row-0-col-moderator`),
-    ).toHaveTextContent("false");
-    expect(screen.getByTestId(`${testId}-cell-row-1-col-id`)).toHaveTextContent(
-      "2",
+    fireEvent.click(toggleAdminButton);
+
+    await waitFor(() => expect(mutateFn).toHaveBeenCalled());
+  });
+
+  test("Toggle Moderator button calls mutation with correct cell", async () => {
+    render(<UsersTable users={usersFixtures.threeUsers} />);
+
+    const toggleModeratorButton = screen.getByTestId(
+      "UsersTable-cell-row-0-col-Toggle Moderator-button",
     );
-    expect(
-      screen.getByTestId(`${testId}-cell-row-1-col-admin`),
-    ).toHaveTextContent("false");
-    expect(
-      screen.getByTestId(`${testId}-cell-row-0-col-moderator`),
-    ).toHaveTextContent("false");
+    fireEvent.click(toggleModeratorButton);
+
+    await waitFor(() => expect(mutateFn).toHaveBeenCalled());
   });
 
   test("Status column appends approval date only for approved users with a valid date", () => {

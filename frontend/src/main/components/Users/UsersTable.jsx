@@ -1,9 +1,24 @@
-import OurTable from "main/components/OurTable";
+import OurTable, { ButtonColumn } from "main/components/OurTable";
+import { useBackendMutation } from "main/utils/useBackend";
+
+// Stryker disable all
+const toggleAdminMutation_params = (cell) => ({
+  url: "/api/admin/toggleAdmin",
+  method: "POST",
+  params: { id: cell.row.original.id },
+});
+
+const toggleModeratorMutation_params = (cell) => ({
+  url: "/api/admin/toggleModerator",
+  method: "POST",
+  params: { id: cell.row.original.id },
+});
+// Stryker restore all
 
 const columns = [
   {
     Header: "id",
-    accessor: "id", // accessor is the "key" in the data
+    accessor: "id",
   },
   {
     Header: "First Name",
@@ -20,7 +35,7 @@ const columns = [
   {
     Header: "Admin",
     id: "admin",
-    accessor: (row, _rowIndex) => String(row.admin), // hack needed for boolean values to show up
+    accessor: (row, _rowIndex) => String(row.admin),
   },
   {
     Header: "Moderator",
@@ -39,7 +54,6 @@ const columns = [
     Header: "Status",
     accessor: (row) => {
       if (row.status === "Approved" && row.dateApproved) {
-        // Parse as local date (YYYY-MM-DD)
         const [year, month, day] = row.dateApproved.split("-");
         const formattedDate = new Date(
           year,
@@ -54,5 +68,40 @@ const columns = [
 ];
 
 export default function UsersTable({ users }) {
-  return <OurTable data={users} columns={columns} testid={"UsersTable"} />;
+  // Stryker disable all
+  const toggleAdminMutation = useBackendMutation(
+    toggleAdminMutation_params,
+    {},
+    ["/api/admin/users"],
+  );
+
+  const toggleModeratorMutation = useBackendMutation(
+    toggleModeratorMutation_params,
+    {},
+    ["/api/admin/users"],
+  );
+  // Stryker restore all
+
+  // Stryker disable next-line all
+  const toggleAdminCallback = async (cell) => {
+    toggleAdminMutation.mutate(cell);
+  };
+
+  // Stryker disable next-line all
+  const toggleModeratorCallback = async (cell) => {
+    toggleModeratorMutation.mutate(cell);
+  };
+
+  const allColumns = [
+    ...columns,
+    ButtonColumn("Toggle Admin", "primary", toggleAdminCallback, "UsersTable"),
+    ButtonColumn(
+      "Toggle Moderator",
+      "primary",
+      toggleModeratorCallback,
+      "UsersTable",
+    ),
+  ];
+
+  return <OurTable data={users} columns={allColumns} testid={"UsersTable"} />;
 }
