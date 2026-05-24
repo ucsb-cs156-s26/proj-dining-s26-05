@@ -1,10 +1,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import usersFixtures from "fixtures/usersFixtures";
-import UsersTable, {
+import UsersTable from "main/components/Users/UsersTable";
+import { useBackendMutation } from "main/utils/useBackend";
+import {
   toggleAdminMutation_params,
   toggleModeratorMutation_params,
-} from "main/components/Users/UsersTable";
-import { useBackendMutation } from "main/utils/useBackend";
+} from "main/utils/UsersTableUtils";
 import { vi } from "vitest";
 
 vi.mock("main/utils/useBackend", () => ({
