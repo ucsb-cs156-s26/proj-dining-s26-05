@@ -1,6 +1,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import usersFixtures from "fixtures/usersFixtures";
-import UsersTable from "main/components/Users/UsersTable";
+import UsersTable, {
+  toggleAdminMutation_params,
+  toggleModeratorMutation_params,
+} from "main/components/Users/UsersTable";
 import { useBackendMutation } from "main/utils/useBackend";
 import { vi } from "vitest";
 
@@ -84,6 +87,26 @@ describe("UserTable tests", () => {
     expect(
       screen.getByTestId(`${testId}-header-Toggle Moderator`),
     ).toBeInTheDocument();
+  });
+
+  test("toggleAdminMutation_params returns correct axios params", () => {
+    const cell = { row: { original: { id: 17 } } };
+    const result = toggleAdminMutation_params(cell);
+    expect(result).toEqual({
+      url: "/api/admin/toggleAdmin",
+      method: "POST",
+      params: { id: 17 },
+    });
+  });
+
+  test("toggleModeratorMutation_params returns correct axios params", () => {
+    const cell = { row: { original: { id: 42 } } };
+    const result = toggleModeratorMutation_params(cell);
+    expect(result).toEqual({
+      url: "/api/admin/toggleModerator",
+      method: "POST",
+      params: { id: 42 },
+    });
   });
 
   test("Toggle Admin button calls mutation with correct cell", async () => {

@@ -2,13 +2,13 @@ import OurTable, { ButtonColumn } from "main/components/OurTable";
 import { useBackendMutation } from "main/utils/useBackend";
 
 // Stryker disable all
-const toggleAdminMutation_params = (cell) => ({
+export const toggleAdminMutation_params = (cell) => ({
   url: "/api/admin/toggleAdmin",
   method: "POST",
   params: { id: cell.row.original.id },
 });
 
-const toggleModeratorMutation_params = (cell) => ({
+export const toggleModeratorMutation_params = (cell) => ({
   url: "/api/admin/toggleModerator",
   method: "POST",
   params: { id: cell.row.original.id },
