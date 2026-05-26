@@ -2,7 +2,9 @@ package edu.ucsb.cs156.dining.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.ucsb.cs156.dining.entities.Moderator;
+import edu.ucsb.cs156.dining.entities.User;
 import edu.ucsb.cs156.dining.repositories.ModeratorRepository;
+import edu.ucsb.cs156.dining.repositories.UserRepository;
 import edu.ucsb.cs156.dining.utilities.CanonicalFormConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +31,7 @@ public class ModeratorsController extends ApiController {
   @Autowired ModeratorRepository moderatorRepository;
 
   @Autowired ObjectMapper mapper;
+  @Autowired UserRepository userRepository;
 
   /**
    * Create a new Moderator, available only to Admins.
@@ -39,7 +42,6 @@ public class ModeratorsController extends ApiController {
   @Operation(summary = "Create a new Moderator")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/post")
-
   public Moderator postModerator(@RequestParam String email) {
     String convertedEmail = CanonicalFormConverter.convertToValidEmail(email).strip();
 
