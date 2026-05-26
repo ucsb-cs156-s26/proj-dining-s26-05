@@ -95,7 +95,7 @@ describe("UserTable tests", () => {
     const result = toggleAdminMutation_params(cell);
     expect(result).toEqual({
       url: "/api/admin/toggleAdmin",
-      method: "POST",
+      method: "PUT",
       params: { id: 17 },
     });
   });
@@ -105,7 +105,7 @@ describe("UserTable tests", () => {
     const result = toggleModeratorMutation_params(cell);
     expect(result).toEqual({
       url: "/api/admin/toggleModerator",
-      method: "POST",
+      method: "PUT",
       params: { id: 42 },
     });
   });
