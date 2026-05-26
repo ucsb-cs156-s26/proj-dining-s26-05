@@ -47,9 +47,9 @@ import org.springframework.web.bind.annotation.RestController;
 
     // If user already exists in the system, mark them as moderator
 <span class="fc" id="L49">    User user = userRepository.findByEmail(convertedEmail).orElse(null);</span>
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    if (user != null) {</span>
-<span class="nc" id="L51">      user.setModerator(true);</span>
-<span class="nc" id="L52">      userRepository.save(user);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    if (user != null) {</span>
+<span class="fc" id="L51">      user.setModerator(true);</span>
+<span class="fc" id="L52">      userRepository.save(user);</span>
     }
 <span class="fc" id="L54">    Moderator moderator = Moderator.builder().email(convertedEmail).build();</span>
 <span class="fc" id="L55">    moderatorRepository.save(moderator);</span>
