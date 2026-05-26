@@ -253,5 +253,77 @@ describe("utils/useBackend tests", () => {
       const errorMessage2 = console.error.mock.calls[2][0];
       expect(errorMessage2).toMatch(/onError from mutation.mutate called!/);
     });
+
+    test("useBackendMutation invalidates each cache key when given an array of keys", async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+      const wrapper = ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      );
+
+      const axiosMock = new AxiosMockAdapter(axios);
+      axiosMock.onDelete("/api/reviews").reply(200, {});
+
+      const objectToAxiosParams = () => ({
+        url: "/api/reviews",
+        method: "DELETE",
+      });
+
+      const { result } = renderHook(
+        () =>
+          useBackendMutation(objectToAxiosParams, {}, [
+            "/api/reviews/userReviews",
+            "/api/reviews/needsmoderation",
+          ]),
+        { wrapper },
+      );
+
+      act(() => result.current.mutate({}));
+
+      await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(2));
+      expect(invalidateSpy).toHaveBeenCalledWith(["/api/reviews/userReviews"]);
+      expect(invalidateSpy).toHaveBeenCalledWith([
+        "/api/reviews/needsmoderation",
+      ]);
+    });
+
+    test("useBackendMutation invalidates the single key when given an array of one", async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+      const wrapper = ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      );
+
+      const axiosMock = new AxiosMockAdapter(axios);
+      axiosMock.onPost("/api/admin/moderators/post").reply(202, {});
+
+      const objectToAxiosParams = () => ({
+        url: "/api/admin/moderators/post",
+        method: "POST",
+      });
+
+      const { result } = renderHook(
+        () =>
+          useBackendMutation(objectToAxiosParams, {}, [
+            "/api/admin/moderators/get",
+          ]),
+        { wrapper },
+      );
+
+      act(() => result.current.mutate({}));
+
+      await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(1));
+      expect(invalidateSpy).toHaveBeenCalledWith(["/api/admin/moderators/get"]);
+    });
   });
 });
