@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">proj-dining</a> &gt; <a href="index.source.html" class="el_package">edu.ucsb.cs156.dining.controllers</a> &gt; <span class="el_source">StatisticsController.java</span></div><h1>StatisticsController.java</h1><pre class="source lang-java linenums">package edu.ucsb.cs156.dining.controllers;
+
+import edu.ucsb.cs156.dining.repositories.ReviewRepository;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsRatingProjection;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsReviewRow;
+import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
+import edu.ucsb.cs156.dining.statuses.ModerationStatus;
+import edu.ucsb.cs156.dining.util.StatsWindow;
+import edu.ucsb.cs156.dining.util.TimeBucket;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@Tag(name = &quot;Statistics&quot;)
+@RequestMapping(&quot;/api/statistics&quot;)
+@RestController
+<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L32">public class StatisticsController extends ApiController {</span>
+
+  private static final int DEFAULT_LIMIT = 10;
+  private static final int MAX_LIMIT = 50;
+  private static final long DEFAULT_MIN_REVIEWS = 3;
+
+  @Autowired ReviewRepository reviewRepository;
+
+<span class="fc" id="L40">  public record StatisticsSummary(</span>
+      long totalApprovedReviews,
+      long totalMenuItemsReviewed,
+      long totalCommonsCovered,
+      LocalDateTime lastUpdated) {}
+
+<span class="fc" id="L46">  public record RatedItem(</span>
+      Long itemId,
+      String name,
+      String diningCommonsCode,
+      String mealCode,
+      Double avgStars,
+      Long reviewCount) {}
+
+<span class="fc" id="L54">  public record CommonsAverage(String diningCommonsCode, Double avgStars, Long reviewCount) {}</span>
+
+<span class="fc" id="L56">  public record CommonsTimeseriesPoint(</span>
+      String diningCommonsCode, LocalDate bucketStart, Double avgStars, Long reviewCount) {}
+
+<span class="fc" id="L59">  private record TimeseriesKey(String diningCommonsCode, LocalDate bucketStart) {}</span>
+
+  @Operation(summary = &quot;Get a summary of review statistics&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;&quot;, produces = &quot;application/json&quot;)
+  public StatisticsSummary getSummary() {
+<span class="fc" id="L65">    return new StatisticsSummary(</span>
+<span class="fc" id="L66">        reviewRepository.countByStatus(ModerationStatus.APPROVED),</span>
+<span class="fc" id="L67">        reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED),</span>
+<span class="fc" id="L68">        reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED),</span>
+<span class="fc" id="L69">        reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED));</span>
+  }
+
+  LocalDateTime sinceFor(StatsWindow window) {
+<span class="fc" id="L73">    return window.since(LocalDateTime.now());</span>
+  }
+
+  private static int clampLimit(int limit) {
+<span class="fc" id="L77">    return Math.min(Math.max(limit, 1), MAX_LIMIT);</span>
+  }
+
+  private static long clampMinReviews(long minReviews) {
+<span class="fc" id="L81">    return Math.max(minReviews, 1L);</span>
+  }
+
+  private RatedItem toRatedItem(ItemRatingProjection p) {
+<span class="fc" id="L85">    return new RatedItem(</span>
+<span class="fc" id="L86">        p.getItemId(),</span>
+<span class="fc" id="L87">        p.getName(),</span>
+<span class="fc" id="L88">        p.getDiningCommonsCode(),</span>
+<span class="fc" id="L89">        p.getMealCode(),</span>
+<span class="fc" id="L90">        p.getAvgStars(),</span>
+<span class="fc" id="L91">        p.getReviewCount());</span>
+  }
+
+  private CommonsAverage toCommonsAverage(CommonsRatingProjection p) {
+<span class="fc" id="L95">    return new CommonsAverage(p.getDiningCommonsCode(), p.getAvgStars(), p.getReviewCount());</span>
+  }
+
+  @Operation(summary = &quot;Get best rated menu items by average stars&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/items/best&quot;, produces = &quot;application/json&quot;)
+  public List&lt;RatedItem&gt; bestRatedItems(
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window,
+      @RequestParam(defaultValue = &quot;&quot; + DEFAULT_LIMIT) int limit,
+      @RequestParam(name = &quot;minReviews&quot;, defaultValue = &quot;&quot; + DEFAULT_MIN_REVIEWS) long minReviews) {
+<span class="fc" id="L105">    int clampedLimit = clampLimit(limit);</span>
+<span class="fc" id="L106">    long clampedMinReviews = clampMinReviews(minReviews);</span>
+
+<span class="fc" id="L108">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L109">    List&lt;ItemRatingProjection&gt; projections =</span>
+<span class="fc" id="L110">        reviewRepository.findTopRatedItems(</span>
+<span class="fc" id="L111">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
+
+<span class="fc" id="L113">    return projections.stream().map(this::toRatedItem).toList();</span>
+  }
+
+  @Operation(summary = &quot;Get worst rated menu items by average stars&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/items/worst&quot;, produces = &quot;application/json&quot;)
+  public List&lt;RatedItem&gt; worstRatedItems(
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window,
+      @RequestParam(defaultValue = &quot;&quot; + DEFAULT_LIMIT) int limit,
+      @RequestParam(name = &quot;minReviews&quot;, defaultValue = &quot;&quot; + DEFAULT_MIN_REVIEWS) long minReviews) {
+<span class="fc" id="L123">    int clampedLimit = clampLimit(limit);</span>
+<span class="fc" id="L124">    long clampedMinReviews = clampMinReviews(minReviews);</span>
+
+<span class="fc" id="L126">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L127">    List&lt;ItemRatingProjection&gt; projections =</span>
+<span class="fc" id="L128">        reviewRepository.findBottomRatedItems(</span>
+<span class="fc" id="L129">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
+
+<span class="fc" id="L131">    return projections.stream().map(this::toRatedItem).toList();</span>
+  }
+
+  @Operation(summary = &quot;Get average star ratings grouped by dining commons&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/commons/averages&quot;, produces = &quot;application/json&quot;)
+  public List&lt;CommonsAverage&gt; commonsAverages(
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window) {
+<span class="fc" id="L139">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L140">    List&lt;CommonsRatingProjection&gt; projections =</span>
+<span class="fc" id="L141">        reviewRepository.findCommonsAverages(ModerationStatus.APPROVED, since);</span>
+
+<span class="fc" id="L143">    return projections.stream().map(this::toCommonsAverage).toList();</span>
+  }
+
+  static List&lt;CommonsTimeseriesPoint&gt; computeTimeseries(
+      List&lt;CommonsReviewRow&gt; rows, TimeBucket bucket) {
+<span class="fc" id="L148">    Map&lt;TimeseriesKey, List&lt;Integer&gt;&gt; starsByKey = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L150" title="All 2 branches covered.">    for (CommonsReviewRow row : rows) {</span>
+<span class="fc" id="L151">      LocalDate bucketStart = bucket.floor(row.getDateItemServed());</span>
+<span class="fc" id="L152">      TimeseriesKey key = new TimeseriesKey(row.getDiningCommonsCode(), bucketStart);</span>
+<span class="fc" id="L153">      starsByKey.computeIfAbsent(key, ignored -&gt; new ArrayList&lt;&gt;()).add(row.getItemsStars());</span>
+<span class="fc" id="L154">    }</span>
+
+<span class="fc" id="L156">    return starsByKey.entrySet().stream()</span>
+<span class="fc" id="L157">        .map(</span>
+            entry -&gt; {
+<span class="fc" id="L159">              List&lt;Integer&gt; stars = entry.getValue();</span>
+<span class="fc" id="L160">              double avgStars = stars.stream().mapToInt(Integer::intValue).average().orElse(0.0);</span>
+<span class="fc" id="L161">              return new CommonsTimeseriesPoint(</span>
+<span class="fc" id="L162">                  entry.getKey().diningCommonsCode(),</span>
+<span class="fc" id="L163">                  entry.getKey().bucketStart(),</span>
+<span class="fc" id="L164">                  avgStars,</span>
+<span class="fc" id="L165">                  (long) stars.size());</span>
+            })
+<span class="fc" id="L167">        .sorted(</span>
+<span class="fc" id="L168">            Comparator.comparing(CommonsTimeseriesPoint::diningCommonsCode)</span>
+<span class="fc" id="L169">                .thenComparing(CommonsTimeseriesPoint::bucketStart))</span>
+<span class="fc" id="L170">        .toList();</span>
+  }
+
+  @Operation(summary = &quot;Get per-commons average ratings over time buckets&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/commons/timeseries&quot;, produces = &quot;application/json&quot;)
+  public List&lt;CommonsTimeseriesPoint&gt; commonsTimeseries(
+      @RequestParam(defaultValue = &quot;DAY&quot;) TimeBucket bucket,
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window) {
+<span class="fc" id="L179">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L180">    List&lt;CommonsReviewRow&gt; rows =</span>
+<span class="fc" id="L181">        reviewRepository.findCommonsReviewRows(ModerationStatus.APPROVED, since);</span>
+
+<span class="fc" id="L183">    return computeTimeseries(rows, bucket);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
