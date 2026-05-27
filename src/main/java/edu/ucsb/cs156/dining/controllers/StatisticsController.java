@@ -59,17 +59,11 @@ public class StatisticsController extends ApiController {
   }
 
   private static int clampLimit(int limit) {
-    if (limit < 1) {
-      return 1;
-    }
-    return Math.min(limit, MAX_LIMIT);
+    return Math.min(Math.max(limit, 1), MAX_LIMIT);
   }
 
   private static long clampMinReviews(long minReviews) {
-    if (minReviews < 1) {
-      return 1;
-    }
-    return minReviews;
+    return Math.max(minReviews, 1L);
   }
 
   private RatedItem toRatedItem(ItemRatingProjection p) {

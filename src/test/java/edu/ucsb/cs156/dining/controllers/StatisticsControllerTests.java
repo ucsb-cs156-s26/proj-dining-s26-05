@@ -188,6 +188,38 @@ public class StatisticsControllerTests extends ControllerTestCase {
 
   @WithMockUser(roles = {"USER"})
   @Test
+  public void items_best_limit_one_passes_through_unchanged() throws Exception {
+    when(reviewRepository.findTopRatedItems(any(), any(), anyLong(), any(Pageable.class)))
+        .thenReturn(Collections.emptyList());
+
+    mockMvc.perform(get("/api/statistics/items/best?limit=1")).andExpect(status().isOk());
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+    verify(reviewRepository, times(1))
+        .findTopRatedItems(eq(ModerationStatus.APPROVED), any(), eq(3L), pageableCaptor.capture());
+
+    org.junit.jupiter.api.Assertions.assertEquals(1, pageableCaptor.getValue().getPageSize());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void items_best_limit_at_max_passes_50() throws Exception {
+    when(reviewRepository.findTopRatedItems(any(), any(), anyLong(), any(Pageable.class)))
+        .thenReturn(Collections.emptyList());
+
+    mockMvc.perform(get("/api/statistics/items/best?limit=50")).andExpect(status().isOk());
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+    verify(reviewRepository, times(1))
+        .findTopRatedItems(eq(ModerationStatus.APPROVED), any(), eq(3L), pageableCaptor.capture());
+
+    org.junit.jupiter.api.Assertions.assertEquals(50, pageableCaptor.getValue().getPageSize());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
   public void items_best_limit_zero_clamped_to_1() throws Exception {
     when(reviewRepository.findTopRatedItems(any(), any(), anyLong(), any(Pageable.class)))
         .thenReturn(Collections.emptyList());
@@ -217,6 +249,23 @@ public class StatisticsControllerTests extends ControllerTestCase {
             eq(ModerationStatus.APPROVED), any(), minReviewsCaptor.capture(), any(Pageable.class));
 
     org.junit.jupiter.api.Assertions.assertEquals(7L, minReviewsCaptor.getValue().longValue());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void items_best_minReviews_one_passes_through_unchanged() throws Exception {
+    when(reviewRepository.findTopRatedItems(any(), any(), anyLong(), any(Pageable.class)))
+        .thenReturn(Collections.emptyList());
+
+    mockMvc.perform(get("/api/statistics/items/best?minReviews=1")).andExpect(status().isOk());
+
+    ArgumentCaptor<Long> minReviewsCaptor = ArgumentCaptor.forClass(Long.class);
+
+    verify(reviewRepository, times(1))
+        .findTopRatedItems(
+            eq(ModerationStatus.APPROVED), any(), minReviewsCaptor.capture(), any(Pageable.class));
+
+    org.junit.jupiter.api.Assertions.assertEquals(1L, minReviewsCaptor.getValue().longValue());
   }
 
   @WithMockUser(roles = {"USER"})
@@ -284,6 +333,40 @@ public class StatisticsControllerTests extends ControllerTestCase {
             eq(ModerationStatus.APPROVED), sinceCaptor.capture(), eq(3L), any(Pageable.class));
 
     org.junit.jupiter.api.Assertions.assertEquals(expectedSince, sinceCaptor.getValue());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void items_worst_limit_one_passes_through_unchanged() throws Exception {
+    when(reviewRepository.findBottomRatedItems(any(), any(), anyLong(), any(Pageable.class)))
+        .thenReturn(Collections.emptyList());
+
+    mockMvc.perform(get("/api/statistics/items/worst?limit=1")).andExpect(status().isOk());
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+    verify(reviewRepository, times(1))
+        .findBottomRatedItems(
+            eq(ModerationStatus.APPROVED), any(), eq(3L), pageableCaptor.capture());
+
+    org.junit.jupiter.api.Assertions.assertEquals(1, pageableCaptor.getValue().getPageSize());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void items_worst_minReviews_one_passes_through_unchanged() throws Exception {
+    when(reviewRepository.findBottomRatedItems(any(), any(), anyLong(), any(Pageable.class)))
+        .thenReturn(Collections.emptyList());
+
+    mockMvc.perform(get("/api/statistics/items/worst?minReviews=1")).andExpect(status().isOk());
+
+    ArgumentCaptor<Long> minReviewsCaptor = ArgumentCaptor.forClass(Long.class);
+
+    verify(reviewRepository, times(1))
+        .findBottomRatedItems(
+            eq(ModerationStatus.APPROVED), any(), minReviewsCaptor.capture(), any(Pageable.class));
+
+    org.junit.jupiter.api.Assertions.assertEquals(1L, minReviewsCaptor.getValue().longValue());
   }
 
   @WithMockUser(roles = {"USER"})
