@@ -2,13 +2,20 @@ package edu.ucsb.cs156.dining.controllers;
 
 import edu.ucsb.cs156.dining.repositories.ReviewRepository;
 import edu.ucsb.cs156.dining.repositories.projections.CommonsRatingProjection;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsReviewRow;
 import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import edu.ucsb.cs156.dining.util.StatsWindow;
+import edu.ucsb.cs156.dining.util.TimeBucket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +52,11 @@ public class StatisticsController extends ApiController {
       Long reviewCount) {}
 
   public record CommonsAverage(String diningCommonsCode, Double avgStars, Long reviewCount) {}
+
+  public record CommonsTimeseriesPoint(
+      String diningCommonsCode, LocalDate bucketStart, Double avgStars, Long reviewCount) {}
+
+  private record TimeseriesKey(String diningCommonsCode, LocalDate bucketStart) {}
 
   @Operation(summary = "Get a summary of review statistics")
   @PreAuthorize("hasRole('ROLE_USER')")
@@ -129,5 +141,45 @@ public class StatisticsController extends ApiController {
         reviewRepository.findCommonsAverages(ModerationStatus.APPROVED, since);
 
     return projections.stream().map(this::toCommonsAverage).toList();
+  }
+
+  static List<CommonsTimeseriesPoint> computeTimeseries(
+      List<CommonsReviewRow> rows, TimeBucket bucket) {
+    Map<TimeseriesKey, List<Integer>> starsByKey = new HashMap<>();
+
+    for (CommonsReviewRow row : rows) {
+      LocalDate bucketStart = bucket.floor(row.getDateItemServed());
+      TimeseriesKey key = new TimeseriesKey(row.getDiningCommonsCode(), bucketStart);
+      starsByKey.computeIfAbsent(key, ignored -> new ArrayList<>()).add(row.getItemsStars());
+    }
+
+    return starsByKey.entrySet().stream()
+        .map(
+            entry -> {
+              List<Integer> stars = entry.getValue();
+              double avgStars = stars.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+              return new CommonsTimeseriesPoint(
+                  entry.getKey().diningCommonsCode(),
+                  entry.getKey().bucketStart(),
+                  avgStars,
+                  (long) stars.size());
+            })
+        .sorted(
+            Comparator.comparing(CommonsTimeseriesPoint::diningCommonsCode)
+                .thenComparing(CommonsTimeseriesPoint::bucketStart))
+        .toList();
+  }
+
+  @Operation(summary = "Get per-commons average ratings over time buckets")
+  @PreAuthorize("hasRole('ROLE_USER')")
+  @GetMapping(value = "/commons/timeseries", produces = "application/json")
+  public List<CommonsTimeseriesPoint> commonsTimeseries(
+      @RequestParam(defaultValue = "DAY") TimeBucket bucket,
+      @RequestParam(defaultValue = "ALL") StatsWindow window) {
+    LocalDateTime since = sinceFor(window);
+    List<CommonsReviewRow> rows =
+        reviewRepository.findCommonsReviewRows(ModerationStatus.APPROVED, since);
+
+    return computeTimeseries(rows, bucket);
   }
 }
