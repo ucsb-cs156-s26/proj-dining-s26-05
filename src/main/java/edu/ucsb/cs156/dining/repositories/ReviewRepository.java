@@ -3,6 +3,7 @@ package edu.ucsb.cs156.dining.repositories;
 import edu.ucsb.cs156.dining.entities.MenuItem;
 import edu.ucsb.cs156.dining.entities.Review;
 import edu.ucsb.cs156.dining.entities.User;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsRatingProjection;
 import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import java.time.LocalDateTime;
@@ -84,4 +85,19 @@ public interface ReviewRepository extends CrudRepository<Review, Long> {
       @Param("since") LocalDateTime since,
       @Param("minReviews") long minReviews,
       Pageable pageable);
+
+  @Query(
+      """
+      SELECT r.item.diningCommonsCode AS diningCommonsCode,
+             AVG(r.itemsStars) AS avgStars,
+             COUNT(r) AS reviewCount
+      FROM reviews r
+      WHERE r.status = :status
+        AND r.dateItemServed >= :since
+        AND r.itemsStars IS NOT NULL
+      GROUP BY r.item.diningCommonsCode
+      ORDER BY AVG(r.itemsStars) DESC, COUNT(r) DESC
+      """)
+  List<CommonsRatingProjection> findCommonsAverages(
+      @Param("status") ModerationStatus status, @Param("since") LocalDateTime since);
 }

@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.dining.controllers;
 
 import edu.ucsb.cs156.dining.repositories.ReviewRepository;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsRatingProjection;
 import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import edu.ucsb.cs156.dining.util.StatsWindow;
@@ -43,6 +44,8 @@ public class StatisticsController extends ApiController {
       Double avgStars,
       Long reviewCount) {}
 
+  public record CommonsAverage(String diningCommonsCode, Double avgStars, Long reviewCount) {}
+
   @Operation(summary = "Get a summary of review statistics")
   @PreAuthorize("hasRole('ROLE_USER')")
   @GetMapping(value = "", produces = "application/json")
@@ -74,6 +77,10 @@ public class StatisticsController extends ApiController {
         p.getMealCode(),
         p.getAvgStars(),
         p.getReviewCount());
+  }
+
+  private CommonsAverage toCommonsAverage(CommonsRatingProjection p) {
+    return new CommonsAverage(p.getDiningCommonsCode(), p.getAvgStars(), p.getReviewCount());
   }
 
   @Operation(summary = "Get best rated menu items by average stars")
@@ -110,5 +117,17 @@ public class StatisticsController extends ApiController {
             ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));
 
     return projections.stream().map(this::toRatedItem).toList();
+  }
+
+  @Operation(summary = "Get average star ratings grouped by dining commons")
+  @PreAuthorize("hasRole('ROLE_USER')")
+  @GetMapping(value = "/commons/averages", produces = "application/json")
+  public List<CommonsAverage> commonsAverages(
+      @RequestParam(defaultValue = "ALL") StatsWindow window) {
+    LocalDateTime since = sinceFor(window);
+    List<CommonsRatingProjection> projections =
+        reviewRepository.findCommonsAverages(ModerationStatus.APPROVED, since);
+
+    return projections.stream().map(this::toCommonsAverage).toList();
   }
 }

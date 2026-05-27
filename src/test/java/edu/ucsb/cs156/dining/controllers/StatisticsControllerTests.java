@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import edu.ucsb.cs156.dining.ControllerTestCase;
 import edu.ucsb.cs156.dining.repositories.ReviewRepository;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsRatingProjection;
 import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import edu.ucsb.cs156.dining.testconfig.TestConfig;
@@ -367,6 +368,77 @@ public class StatisticsControllerTests extends ControllerTestCase {
     org.junit.jupiter.api.Assertions.assertEquals(1L, minReviewsCaptor.getValue().longValue());
   }
 
+  @Test
+  public void commons_averages_logged_out_returns_403() throws Exception {
+    mockMvc.perform(get("/api/statistics/commons/averages")).andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void commons_averages_default_window_ALL_returns_expected_shape() throws Exception {
+    CommonsRatingProjection projection = mockCommonsRatingProjection("ortega", 4.2, 17L);
+    when(reviewRepository.findCommonsAverages(any(), any())).thenReturn(List.of(projection));
+
+    LocalDateTime expectedSince = StatsWindow.ALL.since(LocalDateTime.now());
+
+    mockMvc
+        .perform(get("/api/statistics/commons/averages"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].diningCommonsCode").value("ortega"))
+        .andExpect(jsonPath("$[0].avgStars").value(4.2))
+        .andExpect(jsonPath("$[0].reviewCount").value(17));
+
+    ArgumentCaptor<LocalDateTime> sinceCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+
+    verify(reviewRepository, times(1))
+        .findCommonsAverages(eq(ModerationStatus.APPROVED), sinceCaptor.capture());
+
+    org.junit.jupiter.api.Assertions.assertEquals(expectedSince, sinceCaptor.getValue());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void commons_averages_window_SIX_MONTHS_passes_correct_since() throws Exception {
+    when(reviewRepository.findCommonsAverages(any(), any())).thenReturn(Collections.emptyList());
+
+    LocalDateTime testNow = LocalDateTime.now();
+    LocalDateTime expectedSince = StatsWindow.SIX_MONTHS.since(testNow);
+
+    mockMvc
+        .perform(get("/api/statistics/commons/averages?window=SIX_MONTHS"))
+        .andExpect(status().isOk());
+
+    ArgumentCaptor<LocalDateTime> sinceCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+
+    verify(reviewRepository, times(1))
+        .findCommonsAverages(eq(ModerationStatus.APPROVED), sinceCaptor.capture());
+
+    LocalDateTime actualSince = sinceCaptor.getValue();
+    boolean withinTolerance =
+        !actualSince.isBefore(expectedSince.minusSeconds(2))
+            && !actualSince.isAfter(expectedSince.plusSeconds(2));
+    org.junit.jupiter.api.Assertions.assertTrue(withinTolerance);
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void commons_averages_invalid_window_returns_400() throws Exception {
+    mockMvc
+        .perform(get("/api/statistics/commons/averages?window=BOGUS"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void commons_averages_empty_result_returns_empty_array() throws Exception {
+    when(reviewRepository.findCommonsAverages(any(), any())).thenReturn(Collections.emptyList());
+
+    mockMvc
+        .perform(get("/api/statistics/commons/averages"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+  }
+
   @WithMockUser(roles = {"USER"})
   @Test
   public void items_worst_window_ONE_WEEK_passes_correct_since() throws Exception {
@@ -389,6 +461,15 @@ public class StatisticsControllerTests extends ControllerTestCase {
         !actualSince.isBefore(expectedSince.minusSeconds(2))
             && !actualSince.isAfter(expectedSince.plusSeconds(2));
     org.junit.jupiter.api.Assertions.assertTrue(withinTolerance);
+  }
+
+  private CommonsRatingProjection mockCommonsRatingProjection(
+      String diningCommonsCode, Double avgStars, Long reviewCount) {
+    CommonsRatingProjection projection = mock(CommonsRatingProjection.class);
+    when(projection.getDiningCommonsCode()).thenReturn(diningCommonsCode);
+    when(projection.getAvgStars()).thenReturn(avgStars);
+    when(projection.getReviewCount()).thenReturn(reviewCount);
+    return projection;
   }
 
   private ItemRatingProjection mockItemRatingProjection(
