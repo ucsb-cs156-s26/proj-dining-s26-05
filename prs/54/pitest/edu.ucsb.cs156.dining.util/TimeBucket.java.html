@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>TimeBucket.java</h1>
+
+<table class="src">
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package edu.ucsb.cs156.dining.util;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.DayOfWeek;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.LocalDate;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.LocalDateTime;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.temporal.TemporalAdjusters;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/** Buckets for grouping review statistics over time. */</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public enum TimeBucket {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  DAY,</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  WEEK,</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MONTH;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param dateTime a review&#39;s {@code dateItemServed}</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return the start date of the bucket containing {@code dateTime}</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public LocalDate floor(LocalDateTime dateTime) {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    LocalDate date = dateTime.toLocalDate();</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_20'/>
+20
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_20'>1</a>
+<span>
+1. floor : replaced return value with null for edu/ucsb/cs156/dining/util/TimeBucket::floor &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return switch (this) {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      case DAY -&#62; date;</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      case WEEK -&#62; date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      case MONTH -&#62; date.withDayOfMonth(1);</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    };</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6b61a4b0_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6b61a4b0_20'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>floor<br/><b>Killed by : </b>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:week_floor_wednesday_returns_monday_of_that_week()]</span></span> replaced return value with null for edu/ucsb/cs156/dining/util/TimeBucket::floor &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:week_floor_wednesday_returns_monday_of_that_week()] (0 ms)</li><li>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:week_floor_monday_returns_same_day()] (0 ms)</li><li>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:day_floor_returns_same_calendar_date()] (0 ms)</li><li>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:month_floor_returns_first_of_month()] (0 ms)</li><li>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:week_floor_sunday_returns_previous_monday()] (0 ms)</li><li>edu.ucsb.cs156.dining.util.TimeBucketTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.util.TimeBucketTests]/[method:month_floor_leap_year_february_returns_feb_first()] (0 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests]/[method:computeTimeseries_single_row_returns_average_and_count()] (0 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests]/[method:computeTimeseries_day_bucket_averages_multiple_reviews_same_day()] (1 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests]/[method:computeTimeseries_month_bucket_groups_same_month()] (2 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests]/[method:computeTimeseries_sorts_by_commons_then_bucketStart()] (1 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests]/[method:commons_timeseries_bucket_WEEK_groups_iso_week()] (6 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests]/[method:commons_timeseries_bucket_DAY_groups_same_calendar_day()] (6 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests]/[method:commons_timeseries_default_bucket_DAY_window_ALL_returns_expected_shape()] (8 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests]/[method:commons_timeseries_bucket_MONTH_groups_same_month()] (8 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerTimeseriesTests]/[method:commons_timeseries_results_sorted_by_commons_then_bucketStart()] (9 ms)</li><li>edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests.[engine:junit-jupiter]/[class:edu.ucsb.cs156.dining.controllers.StatisticsControllerComputeTimeseriesTests]/[method:computeTimeseries_week_bucket_groups_cross_day_same_iso_week()] (56 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.17.0
+
+</body>
+</html>
