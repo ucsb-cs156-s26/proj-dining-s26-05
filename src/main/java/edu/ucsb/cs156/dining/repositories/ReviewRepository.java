@@ -3,8 +3,11 @@ package edu.ucsb.cs156.dining.repositories;
 import edu.ucsb.cs156.dining.entities.MenuItem;
 import edu.ucsb.cs156.dining.entities.Review;
 import edu.ucsb.cs156.dining.entities.User;
+import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +40,48 @@ public interface ReviewRepository extends CrudRepository<Review, Long> {
 
   @Query("SELECT MAX(r.dateEdited) FROM reviews r WHERE r.status = :status")
   LocalDateTime findMaxDateEditedByStatus(@Param("status") ModerationStatus status);
+
+  @Query(
+      """
+      SELECT r.item.id AS itemId,
+             r.item.name AS name,
+             r.item.diningCommonsCode AS diningCommonsCode,
+             r.item.mealCode AS mealCode,
+             AVG(r.itemsStars) AS avgStars,
+             COUNT(r) AS reviewCount
+      FROM reviews r
+      WHERE r.status = :status
+        AND r.dateItemServed >= :since
+        AND r.itemsStars IS NOT NULL
+      GROUP BY r.item.id, r.item.name, r.item.diningCommonsCode, r.item.mealCode
+      HAVING COUNT(r) >= :minReviews
+      ORDER BY AVG(r.itemsStars) DESC, COUNT(r) DESC
+      """)
+  List<ItemRatingProjection> findTopRatedItems(
+      @Param("status") ModerationStatus status,
+      @Param("since") LocalDateTime since,
+      @Param("minReviews") long minReviews,
+      Pageable pageable);
+
+  @Query(
+      """
+      SELECT r.item.id AS itemId,
+             r.item.name AS name,
+             r.item.diningCommonsCode AS diningCommonsCode,
+             r.item.mealCode AS mealCode,
+             AVG(r.itemsStars) AS avgStars,
+             COUNT(r) AS reviewCount
+      FROM reviews r
+      WHERE r.status = :status
+        AND r.dateItemServed >= :since
+        AND r.itemsStars IS NOT NULL
+      GROUP BY r.item.id, r.item.name, r.item.diningCommonsCode, r.item.mealCode
+      HAVING COUNT(r) >= :minReviews
+      ORDER BY AVG(r.itemsStars) ASC, COUNT(r) DESC
+      """)
+  List<ItemRatingProjection> findBottomRatedItems(
+      @Param("status") ModerationStatus status,
+      @Param("since") LocalDateTime since,
+      @Param("minReviews") long minReviews,
+      Pageable pageable);
 }
