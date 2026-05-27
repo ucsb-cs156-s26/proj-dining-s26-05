@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">proj-dining</a> &gt; <a href="index.source.html" class="el_package">edu.ucsb.cs156.dining.controllers</a> &gt; <span class="el_source">StatisticsController.java</span></div><h1>StatisticsController.java</h1><pre class="source lang-java linenums">package edu.ucsb.cs156.dining.controllers;
+
+import edu.ucsb.cs156.dining.repositories.ReviewRepository;
+import edu.ucsb.cs156.dining.repositories.projections.CommonsRatingProjection;
+import edu.ucsb.cs156.dining.repositories.projections.ItemRatingProjection;
+import edu.ucsb.cs156.dining.statuses.ModerationStatus;
+import edu.ucsb.cs156.dining.util.StatsWindow;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDateTime;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@Tag(name = &quot;Statistics&quot;)
+@RequestMapping(&quot;/api/statistics&quot;)
+@RestController
+<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L25">public class StatisticsController extends ApiController {</span>
+
+  private static final int DEFAULT_LIMIT = 10;
+  private static final int MAX_LIMIT = 50;
+  private static final long DEFAULT_MIN_REVIEWS = 3;
+
+  @Autowired ReviewRepository reviewRepository;
+
+<span class="fc" id="L33">  public record StatisticsSummary(</span>
+      long totalApprovedReviews,
+      long totalMenuItemsReviewed,
+      long totalCommonsCovered,
+      LocalDateTime lastUpdated) {}
+
+<span class="fc" id="L39">  public record RatedItem(</span>
+      Long itemId,
+      String name,
+      String diningCommonsCode,
+      String mealCode,
+      Double avgStars,
+      Long reviewCount) {}
+
+<span class="fc" id="L47">  public record CommonsAverage(String diningCommonsCode, Double avgStars, Long reviewCount) {}</span>
+
+  @Operation(summary = &quot;Get a summary of review statistics&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;&quot;, produces = &quot;application/json&quot;)
+  public StatisticsSummary getSummary() {
+<span class="fc" id="L53">    return new StatisticsSummary(</span>
+<span class="fc" id="L54">        reviewRepository.countByStatus(ModerationStatus.APPROVED),</span>
+<span class="fc" id="L55">        reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED),</span>
+<span class="fc" id="L56">        reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED),</span>
+<span class="fc" id="L57">        reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED));</span>
+  }
+
+  LocalDateTime sinceFor(StatsWindow window) {
+<span class="fc" id="L61">    return window.since(LocalDateTime.now());</span>
+  }
+
+  private static int clampLimit(int limit) {
+<span class="fc" id="L65">    return Math.min(Math.max(limit, 1), MAX_LIMIT);</span>
+  }
+
+  private static long clampMinReviews(long minReviews) {
+<span class="fc" id="L69">    return Math.max(minReviews, 1L);</span>
+  }
+
+  private RatedItem toRatedItem(ItemRatingProjection p) {
+<span class="fc" id="L73">    return new RatedItem(</span>
+<span class="fc" id="L74">        p.getItemId(),</span>
+<span class="fc" id="L75">        p.getName(),</span>
+<span class="fc" id="L76">        p.getDiningCommonsCode(),</span>
+<span class="fc" id="L77">        p.getMealCode(),</span>
+<span class="fc" id="L78">        p.getAvgStars(),</span>
+<span class="fc" id="L79">        p.getReviewCount());</span>
+  }
+
+  private CommonsAverage toCommonsAverage(CommonsRatingProjection p) {
+<span class="fc" id="L83">    return new CommonsAverage(p.getDiningCommonsCode(), p.getAvgStars(), p.getReviewCount());</span>
+  }
+
+  @Operation(summary = &quot;Get best rated menu items by average stars&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/items/best&quot;, produces = &quot;application/json&quot;)
+  public List&lt;RatedItem&gt; bestRatedItems(
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window,
+      @RequestParam(defaultValue = &quot;&quot; + DEFAULT_LIMIT) int limit,
+      @RequestParam(name = &quot;minReviews&quot;, defaultValue = &quot;&quot; + DEFAULT_MIN_REVIEWS) long minReviews) {
+<span class="fc" id="L93">    int clampedLimit = clampLimit(limit);</span>
+<span class="fc" id="L94">    long clampedMinReviews = clampMinReviews(minReviews);</span>
+
+<span class="fc" id="L96">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L97">    List&lt;ItemRatingProjection&gt; projections =</span>
+<span class="fc" id="L98">        reviewRepository.findTopRatedItems(</span>
+<span class="fc" id="L99">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
+
+<span class="fc" id="L101">    return projections.stream().map(this::toRatedItem).toList();</span>
+  }
+
+  @Operation(summary = &quot;Get worst rated menu items by average stars&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/items/worst&quot;, produces = &quot;application/json&quot;)
+  public List&lt;RatedItem&gt; worstRatedItems(
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window,
+      @RequestParam(defaultValue = &quot;&quot; + DEFAULT_LIMIT) int limit,
+      @RequestParam(name = &quot;minReviews&quot;, defaultValue = &quot;&quot; + DEFAULT_MIN_REVIEWS) long minReviews) {
+<span class="fc" id="L111">    int clampedLimit = clampLimit(limit);</span>
+<span class="fc" id="L112">    long clampedMinReviews = clampMinReviews(minReviews);</span>
+
+<span class="fc" id="L114">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L115">    List&lt;ItemRatingProjection&gt; projections =</span>
+<span class="fc" id="L116">        reviewRepository.findBottomRatedItems(</span>
+<span class="fc" id="L117">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
+
+<span class="fc" id="L119">    return projections.stream().map(this::toRatedItem).toList();</span>
+  }
+
+  @Operation(summary = &quot;Get average star ratings grouped by dining commons&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(value = &quot;/commons/averages&quot;, produces = &quot;application/json&quot;)
+  public List&lt;CommonsAverage&gt; commonsAverages(
+      @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window) {
+<span class="fc" id="L127">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L128">    List&lt;CommonsRatingProjection&gt; projections =</span>
+<span class="fc" id="L129">        reviewRepository.findCommonsAverages(ModerationStatus.APPROVED, since);</span>
+
+<span class="fc" id="L131">    return projections.stream().map(this::toCommonsAverage).toList();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
