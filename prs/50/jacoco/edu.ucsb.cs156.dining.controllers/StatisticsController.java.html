@@ -59,27 +59,21 @@ import org.springframework.web.bind.annotation.RestController;
   }
 
   private static int clampLimit(int limit) {
-<span class="fc bfc" id="L62" title="All 2 branches covered.">    if (limit &lt; 1) {</span>
-<span class="fc" id="L63">      return 1;</span>
-    }
-<span class="fc" id="L65">    return Math.min(limit, MAX_LIMIT);</span>
+<span class="fc" id="L62">    return Math.min(Math.max(limit, 1), MAX_LIMIT);</span>
   }
 
   private static long clampMinReviews(long minReviews) {
-<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (minReviews &lt; 1) {</span>
-<span class="fc" id="L70">      return 1;</span>
-    }
-<span class="fc" id="L72">    return minReviews;</span>
+<span class="fc" id="L66">    return Math.max(minReviews, 1L);</span>
   }
 
   private RatedItem toRatedItem(ItemRatingProjection p) {
-<span class="fc" id="L76">    return new RatedItem(</span>
-<span class="fc" id="L77">        p.getItemId(),</span>
-<span class="fc" id="L78">        p.getName(),</span>
-<span class="fc" id="L79">        p.getDiningCommonsCode(),</span>
-<span class="fc" id="L80">        p.getMealCode(),</span>
-<span class="fc" id="L81">        p.getAvgStars(),</span>
-<span class="fc" id="L82">        p.getReviewCount());</span>
+<span class="fc" id="L70">    return new RatedItem(</span>
+<span class="fc" id="L71">        p.getItemId(),</span>
+<span class="fc" id="L72">        p.getName(),</span>
+<span class="fc" id="L73">        p.getDiningCommonsCode(),</span>
+<span class="fc" id="L74">        p.getMealCode(),</span>
+<span class="fc" id="L75">        p.getAvgStars(),</span>
+<span class="fc" id="L76">        p.getReviewCount());</span>
   }
 
   @Operation(summary = &quot;Get best rated menu items by average stars&quot;)
@@ -89,15 +83,15 @@ import org.springframework.web.bind.annotation.RestController;
       @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window,
       @RequestParam(defaultValue = &quot;&quot; + DEFAULT_LIMIT) int limit,
       @RequestParam(name = &quot;minReviews&quot;, defaultValue = &quot;&quot; + DEFAULT_MIN_REVIEWS) long minReviews) {
-<span class="fc" id="L92">    int clampedLimit = clampLimit(limit);</span>
-<span class="fc" id="L93">    long clampedMinReviews = clampMinReviews(minReviews);</span>
+<span class="fc" id="L86">    int clampedLimit = clampLimit(limit);</span>
+<span class="fc" id="L87">    long clampedMinReviews = clampMinReviews(minReviews);</span>
 
-<span class="fc" id="L95">    LocalDateTime since = sinceFor(window);</span>
-<span class="fc" id="L96">    List&lt;ItemRatingProjection&gt; projections =</span>
-<span class="fc" id="L97">        reviewRepository.findTopRatedItems(</span>
-<span class="fc" id="L98">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
+<span class="fc" id="L89">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L90">    List&lt;ItemRatingProjection&gt; projections =</span>
+<span class="fc" id="L91">        reviewRepository.findTopRatedItems(</span>
+<span class="fc" id="L92">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
 
-<span class="fc" id="L100">    return projections.stream().map(this::toRatedItem).toList();</span>
+<span class="fc" id="L94">    return projections.stream().map(this::toRatedItem).toList();</span>
   }
 
   @Operation(summary = &quot;Get worst rated menu items by average stars&quot;)
@@ -107,15 +101,15 @@ import org.springframework.web.bind.annotation.RestController;
       @RequestParam(defaultValue = &quot;ALL&quot;) StatsWindow window,
       @RequestParam(defaultValue = &quot;&quot; + DEFAULT_LIMIT) int limit,
       @RequestParam(name = &quot;minReviews&quot;, defaultValue = &quot;&quot; + DEFAULT_MIN_REVIEWS) long minReviews) {
-<span class="fc" id="L110">    int clampedLimit = clampLimit(limit);</span>
-<span class="fc" id="L111">    long clampedMinReviews = clampMinReviews(minReviews);</span>
+<span class="fc" id="L104">    int clampedLimit = clampLimit(limit);</span>
+<span class="fc" id="L105">    long clampedMinReviews = clampMinReviews(minReviews);</span>
 
-<span class="fc" id="L113">    LocalDateTime since = sinceFor(window);</span>
-<span class="fc" id="L114">    List&lt;ItemRatingProjection&gt; projections =</span>
-<span class="fc" id="L115">        reviewRepository.findBottomRatedItems(</span>
-<span class="fc" id="L116">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
+<span class="fc" id="L107">    LocalDateTime since = sinceFor(window);</span>
+<span class="fc" id="L108">    List&lt;ItemRatingProjection&gt; projections =</span>
+<span class="fc" id="L109">        reviewRepository.findBottomRatedItems(</span>
+<span class="fc" id="L110">            ModerationStatus.APPROVED, since, clampedMinReviews, PageRequest.of(0, clampedLimit));</span>
 
-<span class="fc" id="L118">    return projections.stream().map(this::toRatedItem).toList();</span>
+<span class="fc" id="L112">    return projections.stream().map(this::toRatedItem).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
