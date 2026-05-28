@@ -24,7 +24,7 @@ public class StatisticsController extends ApiController {
       long totalApprovedReviews,
       long totalMenuItemsReviewed,
       long totalCommonsCovered,
-      LocalDateTime lastUpdated) {}
+      LocalDateTime lastReviewDate) {}
 
   @Operation(summary = "Get a summary of review statistics")
   @PreAuthorize("hasRole('ROLE_USER')")
@@ -34,6 +34,6 @@ public class StatisticsController extends ApiController {
         reviewRepository.countByStatus(ModerationStatus.APPROVED),
         reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED),
         reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED),
-        reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED));
+        reviewRepository.findMaxDateItemServedByStatus(ModerationStatus.APPROVED));
   }
 }

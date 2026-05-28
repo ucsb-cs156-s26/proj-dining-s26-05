@@ -38,8 +38,8 @@ public interface ReviewRepository extends CrudRepository<Review, Long> {
   @Query("SELECT COUNT(DISTINCT r.item.diningCommonsCode) FROM reviews r WHERE r.status = :status")
   long countDistinctCommonsByStatus(@Param("status") ModerationStatus status);
 
-  @Query("SELECT MAX(r.dateEdited) FROM reviews r WHERE r.status = :status")
-  LocalDateTime findMaxDateEditedByStatus(@Param("status") ModerationStatus status);
+  @Query("SELECT MAX(r.dateItemServed) FROM reviews r WHERE r.status = :status")
+  LocalDateTime findMaxDateItemServedByStatus(@Param("status") ModerationStatus status);
 
   @Query(
       """

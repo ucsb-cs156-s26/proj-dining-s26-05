@@ -39,12 +39,12 @@ public class StatisticsControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"USER"})
   @Test
   public void api_statistics_user_logged_in_returns_expected_shape() throws Exception {
-    LocalDateTime lastUpdated = LocalDateTime.parse("2026-05-26T18:00:00");
+    LocalDateTime lastReviewDate = LocalDateTime.parse("2026-05-26T18:00:00");
     when(reviewRepository.countByStatus(ModerationStatus.APPROVED)).thenReturn(10L);
     when(reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED)).thenReturn(7L);
     when(reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED)).thenReturn(4L);
-    when(reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED))
-        .thenReturn(lastUpdated);
+    when(reviewRepository.findMaxDateItemServedByStatus(ModerationStatus.APPROVED))
+        .thenReturn(lastReviewDate);
 
     mockMvc
         .perform(get("/api/statistics"))
@@ -52,12 +52,12 @@ public class StatisticsControllerTests extends ControllerTestCase {
         .andExpect(jsonPath("$.totalApprovedReviews").value(10))
         .andExpect(jsonPath("$.totalMenuItemsReviewed").value(7))
         .andExpect(jsonPath("$.totalCommonsCovered").value(4))
-        .andExpect(jsonPath("$.lastUpdated").value("2026-05-26T18:00:00"));
+        .andExpect(jsonPath("$.lastReviewDate").value("2026-05-26T18:00:00"));
 
     verify(reviewRepository, times(1)).countByStatus(ModerationStatus.APPROVED);
     verify(reviewRepository, times(1)).countDistinctItemsByStatus(ModerationStatus.APPROVED);
     verify(reviewRepository, times(1)).countDistinctCommonsByStatus(ModerationStatus.APPROVED);
-    verify(reviewRepository, times(1)).findMaxDateEditedByStatus(ModerationStatus.APPROVED);
+    verify(reviewRepository, times(1)).findMaxDateItemServedByStatus(ModerationStatus.APPROVED);
   }
 
   @WithMockUser(roles = {"USER", "ADMIN"})
@@ -66,7 +66,8 @@ public class StatisticsControllerTests extends ControllerTestCase {
     when(reviewRepository.countByStatus(ModerationStatus.APPROVED)).thenReturn(0L);
     when(reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED)).thenReturn(0L);
     when(reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED)).thenReturn(0L);
-    when(reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED)).thenReturn(null);
+    when(reviewRepository.findMaxDateItemServedByStatus(ModerationStatus.APPROVED))
+        .thenReturn(null);
 
     mockMvc.perform(get("/api/statistics")).andExpect(status().isOk());
   }
@@ -77,7 +78,8 @@ public class StatisticsControllerTests extends ControllerTestCase {
     when(reviewRepository.countByStatus(ModerationStatus.APPROVED)).thenReturn(0L);
     when(reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED)).thenReturn(0L);
     when(reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED)).thenReturn(0L);
-    when(reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED)).thenReturn(null);
+    when(reviewRepository.findMaxDateItemServedByStatus(ModerationStatus.APPROVED))
+        .thenReturn(null);
 
     mockMvc
         .perform(get("/api/statistics"))
@@ -85,6 +87,6 @@ public class StatisticsControllerTests extends ControllerTestCase {
         .andExpect(jsonPath("$.totalApprovedReviews").value(0))
         .andExpect(jsonPath("$.totalMenuItemsReviewed").value(0))
         .andExpect(jsonPath("$.totalCommonsCovered").value(0))
-        .andExpect(jsonPath("$.lastUpdated").doesNotExist());
+        .andExpect(jsonPath("$.lastReviewDate").doesNotExist());
   }
 }
