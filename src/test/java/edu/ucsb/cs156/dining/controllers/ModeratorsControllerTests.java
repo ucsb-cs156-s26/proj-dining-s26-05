@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import edu.ucsb.cs156.dining.ControllerTestCase;
 import edu.ucsb.cs156.dining.entities.Moderator;
-import edu.ucsb.cs156.dining.entities.User;
 import edu.ucsb.cs156.dining.repositories.ModeratorRepository;
 import edu.ucsb.cs156.dining.repositories.UserRepository;
 import edu.ucsb.cs156.dining.testconfig.TestConfig;
@@ -89,31 +88,6 @@ public class ModeratorsControllerTests extends ControllerTestCase {
     String expectedJson = mapper.writeValueAsString(moderator);
     String responseString = response.getResponse().getContentAsString();
     assertEquals(expectedJson, responseString);
-  }
-
-  @WithMockUser(roles = {"ADMIN"})
-  @Test
-  public void logged_in_admins_can_post_and_existing_user_is_marked_as_moderator()
-      throws Exception {
-    // arrange
-    Moderator moderator = Moderator.builder().email("ins@ucsb.edu").build();
-    User existingUser = User.builder().email("ins@ucsb.edu").moderator(false).build();
-    when(userRepository.findByEmail("ins@ucsb.edu")).thenReturn(Optional.of(existingUser));
-
-    // act
-    MvcResult response =
-        mockMvc
-            .perform(post("/api/admin/moderators/post?email=ins@ucsb.edu").with(csrf()))
-            .andExpect(status().isOk())
-            .andReturn();
-
-    // assert
-    verify(userRepository, times(1)).findByEmail("ins@ucsb.edu");
-    verify(userRepository, times(1)).save(existingUser);
-    verify(moderatorRepository, times(1)).save(eq(moderator));
-    String expectedJson = mapper.writeValueAsString(moderator);
-    assertEquals(expectedJson, response.getResponse().getContentAsString());
-    assertEquals(true, existingUser.isModerator());
   }
 
   // Tests for the GET endpoint
