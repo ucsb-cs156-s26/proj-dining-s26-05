@@ -1,6 +1,5 @@
 package edu.ucsb.cs156.dining.controllers;
 
-import edu.ucsb.cs156.dining.repositories.MenuItemRepository;
 import edu.ucsb.cs156.dining.repositories.ReviewRepository;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import io.swagger.v3.oas.annotations.Operation;
