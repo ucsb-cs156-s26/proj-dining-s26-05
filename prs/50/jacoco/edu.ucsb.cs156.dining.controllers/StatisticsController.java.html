@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
       long totalApprovedReviews,
       long totalMenuItemsReviewed,
       long totalCommonsCovered,
-      LocalDateTime lastUpdated) {}
+      LocalDateTime lastReviewDate) {}
 
 <span class="fc" id="L38">  public record RatedItem(</span>
       Long itemId,
@@ -51,7 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 <span class="fc" id="L51">        reviewRepository.countByStatus(ModerationStatus.APPROVED),</span>
 <span class="fc" id="L52">        reviewRepository.countDistinctItemsByStatus(ModerationStatus.APPROVED),</span>
 <span class="fc" id="L53">        reviewRepository.countDistinctCommonsByStatus(ModerationStatus.APPROVED),</span>
-<span class="fc" id="L54">        reviewRepository.findMaxDateEditedByStatus(ModerationStatus.APPROVED));</span>
+<span class="fc" id="L54">        reviewRepository.findMaxDateItemServedByStatus(ModerationStatus.APPROVED));</span>
   }
 
   LocalDateTime sinceFor(StatsWindow window) {
