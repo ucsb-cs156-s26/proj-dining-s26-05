@@ -20,8 +20,6 @@ public class StatisticsController extends ApiController {
 
   @Autowired ReviewRepository reviewRepository;
 
-  @Autowired MenuItemRepository menuItemRepository;
-
   public record StatisticsSummary(
       long totalApprovedReviews,
       long totalMenuItemsReviewed,
