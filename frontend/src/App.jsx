@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import HomePage from "main/pages/HomePage";
 import ProfilePage from "main/pages/ProfilePage";
 import AdminUsersPage from "main/pages/AdminUsersPage";
+import DeveloperPage from "main/pages/DeveloperPage";
 
 import ReviewsPage from "main/pages/Reviews/ReviewsPage";
 
@@ -42,6 +43,7 @@ function App() {
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <>
             <Route exact path="/admin/users" element={<AdminUsersPage />} />
+            <Route exact path="/admin/developer" element={<DeveloperPage />} />
             <Route exact path="/admin/admins/" element={<AdminsIndexPage />} />
             <Route
               exact

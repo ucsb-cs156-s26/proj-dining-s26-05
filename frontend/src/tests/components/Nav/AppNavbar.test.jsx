@@ -50,6 +50,10 @@ describe("AppNavbar tests", () => {
     expect(usersLink).toHaveAttribute("href", "/admin/users");
     expect(usersLink.tagName).toBe("A");
 
+    const developerLink = screen.getByText("Developer Info");
+    expect(developerLink).toHaveAttribute("href", "/admin/developer");
+    expect(developerLink.tagName).toBe("A");
+
     await userEvent.click(screen.getByText("Moderate"));
     const moderatorPageLink = await screen.findByText("Moderator Page");
     expect(moderatorPageLink).toHaveAttribute("href", "/moderate/aliases");

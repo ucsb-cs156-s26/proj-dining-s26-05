@@ -75,6 +75,10 @@ export default function AppNavbar({
                     <NavDropdown.Item href="/admin/moderators/create">
                       Create Moderator
                     </NavDropdown.Item>
+
+                    <NavDropdown.Item as={Link} to="/admin/developer">
+                      Developer Info
+                    </NavDropdown.Item>
                   </NavDropdown>
                 </>
               )}
