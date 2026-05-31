@@ -27,9 +27,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest(controllers = ModeratorController.class)
+@WebMvcTest(controllers = ModeratorsController.class)
 @Import(TestConfig.class)
-public class ModeratorControllerTests extends ControllerTestCase {
+public class ModeratorsControllerTests extends ControllerTestCase {
 
   @MockitoBean ModeratorRepository moderatorRepository;
   @MockitoBean UserRepository userRepository;
@@ -53,6 +53,25 @@ public class ModeratorControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"ADMIN"})
   @Test
   public void logged_in_admins_can_post() throws Exception {
+    // arrange
+    Moderator moderator = Moderator.builder().email("ins@ucsb.edu").build();
+
+    // act
+    MvcResult response =
+        mockMvc
+            .perform(post("/api/admin/moderators/post?email=ins@ucsb.edu").with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    // assert
+    verify(moderatorRepository, times(1)).save(eq(moderator));
+    String expectedJson = mapper.writeValueAsString(moderator);
+    assertEquals(expectedJson, response.getResponse().getContentAsString());
+  }
+
+  @WithMockUser(roles = {"ADMIN"})
+  @Test
+  public void logged_in_admins_can_post_and_email_is_sanitized() throws Exception {
     // arrage
     Moderator moderator = Moderator.builder().email("ins@ucsb.edu").build();
     when(moderatorRepository.findAll()).thenReturn(new ArrayList<>(Arrays.asList(moderator)));
@@ -60,7 +79,7 @@ public class ModeratorControllerTests extends ControllerTestCase {
     // act
     MvcResult response =
         mockMvc
-            .perform(post("/api/admin/moderators/post?email=ins@ucsb.edu").with(csrf()))
+            .perform(post("/api/admin/moderators/post?email= ins@ucsb.edu ").with(csrf()))
             .andExpect(status().isOk())
             .andReturn();
 
